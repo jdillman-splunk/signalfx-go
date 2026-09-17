@@ -1,6 +1,10 @@
 package template
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"github.com/signalfx/signalfx-go/util"
+)
 
 // RecordType is the schema type used by Template API records.
 const RecordType = "https://schema.splunkdev.com/dashify/v1/templates/Record"
@@ -87,12 +91,7 @@ type Template struct {
 	UpdatedBy        *string         `json:"updatedBy"`
 }
 
-// APIError is an error entry in a Template API response envelope: a status
-// code as a string and a human-readable message.
-type APIError struct {
-	Code    string `json:"code,omitempty"`
-	Message string `json:"message,omitempty"`
-}
+type APIError = util.APIError
 
 // Result is the response envelope for a single Template operation.
 type Result struct {
