@@ -59,11 +59,11 @@ type Metadata struct {
 	Imports     []string     `json:"imports"`
 }
 
-// Write is the body used to create or replace a Template record.
+// Content is the body used to create or replace a Template record.
 //
 // Spec contains the polymorphic Dashify document. SignalView is omitted for a
 // nil value and may contain the association update object accepted by the API.
-type Write struct {
+type Content struct {
 	Type       string          `json:"type"`
 	Spec       json.RawMessage `json:"spec"`
 	Title      string          `json:"title"`

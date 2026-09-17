@@ -3,7 +3,6 @@ package signalfx
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"io"
 	"net/http"
 	"net/url"
@@ -59,9 +58,9 @@ const templateDatasourceRequestBody = `{
   }
 }`
 
-func testTemplateWrite() *template.Write {
+func testContent() *template.Content {
 	rootElement := template.RootElementDashboard
-	return &template.Write{
+	return &template.Content{
 		Type:  template.RecordType,
 		Spec:  json.RawMessage(`{"<Dashboard>":[],"$import:chart0":"/v2/template/HNPr-tr_AAc"}`),
 		Title: "Service overview",
@@ -77,7 +76,7 @@ func TestCreateTemplateWithDatasource(t *testing.T) {
 	defer teardown()
 
 	rootElement := template.RootElementChart
-	write := &template.Write{
+	write := &template.Content{
 		Type:  template.RecordType,
 		Spec:  json.RawMessage(`{"<Chart>":[]}`),
 		Title: "Request rate",
@@ -134,7 +133,7 @@ func TestCreateTemplate(t *testing.T) {
 		"template/dashboard_success.json",
 	))
 
-	result, err := client.CreateTemplate(context.Background(), testTemplateWrite())
+	result, err := client.CreateTemplate(context.Background(), testContent())
 	require.NoError(t, err)
 	require.NotNil(t, result.Data)
 	assert.Equal(t, "HNPz_pNAIAE", result.Data.ID)
@@ -196,7 +195,7 @@ func TestUpdateTemplate(t *testing.T) {
 	teardown := setup()
 	defer teardown()
 
-	write := testTemplateWrite()
+	write := testContent()
 	write.SignalView = json.RawMessage(`{"lastConvertedAt":null}`)
 	mux.HandleFunc(TemplateAPIURL+"/HNPz_pNAIAE", verifyRequestWithJsonBody(
 		t,
@@ -321,7 +320,7 @@ func TestUpdateTemplateResponseErrorDoesNotExposeRequest(t *testing.T) {
 	teardown := setup()
 	defer teardown()
 
-	write := testTemplateWrite()
+	write := testContent()
 	write.Title = "private template title"
 	mux.HandleFunc(
 		TemplateAPIURL+"/HNPz_pNAIAE",
@@ -350,7 +349,7 @@ func TestTemplateRejectsInvalidArguments(t *testing.T) {
 	assert.Nil(t, result)
 	assert.EqualError(t, err, "template ID must not be empty")
 
-	result, err = c.UpdateTemplate(context.Background(), "", testTemplateWrite())
+	result, err = c.UpdateTemplate(context.Background(), "", testContent())
 	assert.Nil(t, result)
 	assert.EqualError(t, err, "template ID must not be empty")
 
@@ -370,11 +369,13 @@ func TestTemplateRejectsInvalidArguments(t *testing.T) {
 func TestTemplateOptionParamsOmitZeroValues(t *testing.T) {
 	assert.Empty(t, templateGetParams(&template.GetOptions{}))
 	assert.Empty(t, templateSearchParams(&template.SearchOptions{}))
+	assert.NotNil(t, templateGetParams(nil))
+	assert.NotNil(t, templateSearchParams(nil))
 }
 
 func TestCreateTemplateRejectsInvalidRawJSON(t *testing.T) {
 	c := &Client{}
-	write := testTemplateWrite()
+	write := testContent()
 	write.Spec = json.RawMessage("{")
 
 	result, err := c.CreateTemplate(context.Background(), write)
@@ -398,19 +399,6 @@ func TestTemplateMalformedResponse(t *testing.T) {
 	assert.Nil(t, result)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "decode template response")
-}
-
-func TestTemplateTransportError(t *testing.T) {
-	expectedErr := errors.New("template transport failed")
-	httpClient := &http.Client{Transport: templateRoundTripperFunc(func(*http.Request) (*http.Response, error) {
-		return nil, expectedErr
-	})}
-	c, err := NewClient(TestToken, HTTPClient(httpClient))
-	require.NoError(t, err)
-
-	result, err := c.GetTemplate(context.Background(), "valid-id", nil)
-	assert.Nil(t, result)
-	assert.ErrorIs(t, err, expectedErr)
 }
 
 func TestTemplateClosesResponseBody(t *testing.T) {

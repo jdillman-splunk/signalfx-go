@@ -25,7 +25,7 @@ var (
 )
 
 // CreateTemplate creates a Template record.
-func (c *Client) CreateTemplate(ctx context.Context, write *template.Write) (*template.Result, error) {
+func (c *Client) CreateTemplate(ctx context.Context, write *template.Content) (*template.Result, error) {
 	if write == nil {
 		return nil, errNilTemplateWrite
 	}
@@ -54,7 +54,7 @@ func (c *Client) GetTemplate(ctx context.Context, id string, options *template.G
 }
 
 // UpdateTemplate fully replaces a Template record.
-func (c *Client) UpdateTemplate(ctx context.Context, id string, write *template.Write) (*template.Result, error) {
+func (c *Client) UpdateTemplate(ctx context.Context, id string, write *template.Content) (*template.Result, error) {
 	path, err := templateAPIPath(id)
 	if err != nil {
 		return nil, err
@@ -91,7 +91,7 @@ func (c *Client) SearchTemplates(ctx context.Context, options *template.SearchOp
 	return result, nil
 }
 
-func (c *Client) executeTemplateRequest(ctx context.Context, method string, path string, expectedStatus int, write *template.Write, params url.Values, result any) error {
+func (c *Client) executeTemplateRequest(ctx context.Context, method string, path string, expectedStatus int, write *template.Content, params url.Values, result any) error {
 	var body io.Reader
 	if write != nil {
 		payload, err := json.Marshal(write)
@@ -137,7 +137,7 @@ func templateAPIPath(id string) (string, error) {
 
 func templateGetParams(options *template.GetOptions) url.Values {
 	if options == nil {
-		return nil
+		return url.Values{}
 	}
 
 	params := url.Values{}
@@ -147,7 +147,7 @@ func templateGetParams(options *template.GetOptions) url.Values {
 
 func templateSearchParams(options *template.SearchOptions) url.Values {
 	if options == nil {
-		return nil
+		return url.Values{}
 	}
 
 	params := url.Values{}
