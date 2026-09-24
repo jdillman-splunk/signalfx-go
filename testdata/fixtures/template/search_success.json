@@ -1,6 +1,6 @@
 {
   "data": {
-    "type": "https://schema.splunkdev.com/dashify/v1/common/Collection",
+    "type": "#/dashify/v1/common/Collection",
     "self": "/v2/template?offset=0&rootElement=Dashboard&size=200",
     "next": null,
     "prev": null,
@@ -14,7 +14,7 @@
     {
       "id": "HNPz_pNAIAE",
       "self": "/v2/template/HNPz_pNAIAE",
-      "type": "https://schema.splunkdev.com/dashify/v1/templates/Record",
+      "type": "#/dashify/v1/templates/Record",
       "title": "Service overview",
       "spec": {
         "<Dashboard>": []

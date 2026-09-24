@@ -2,7 +2,7 @@
   "data": {
     "id": "minimal-id",
     "self": "/v2/template/minimal-id",
-    "type": "https://schema.splunkdev.com/dashify/v1/templates/Record",
+    "type": "#/dashify/v1/templates/Record",
     "title": "Minimal template",
     "spec": {}
   }

@@ -14,8 +14,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const templateRecordType = "#/dashify/v1/templates/Record"
+
 const templateRequestBody = `{
-  "type": "https://schema.splunkdev.com/dashify/v1/templates/Record",
+  "type": "#/dashify/v1/templates/Record",
   "spec": {
     "<Dashboard>": [],
     "$import:chart0": "/v2/template/HNPr-tr_AAc"
@@ -28,7 +30,7 @@ const templateRequestBody = `{
 }`
 
 const templateUpdateRequestBody = `{
-  "type": "https://schema.splunkdev.com/dashify/v1/templates/Record",
+  "type": "#/dashify/v1/templates/Record",
   "spec": {
     "<Dashboard>": [],
     "$import:chart0": "/v2/template/HNPr-tr_AAc"
@@ -44,7 +46,7 @@ const templateUpdateRequestBody = `{
 }`
 
 const templateDatasourceRequestBody = `{
-  "type": "https://schema.splunkdev.com/dashify/v1/templates/Record",
+  "type": "#/dashify/v1/templates/Record",
   "spec": {
     "<Chart>": []
   },
@@ -58,10 +60,10 @@ const templateDatasourceRequestBody = `{
   }
 }`
 
-func testContent() *template.Content {
+func testTemplateWriteRequest() *template.CreateUpdateTemplateRequest {
 	rootElement := template.RootElementDashboard
-	return &template.Content{
-		Type:  template.RecordType,
+	return &template.CreateUpdateTemplateRequest{
+		Type:  templateRecordType,
 		Spec:  json.RawMessage(`{"<Dashboard>":[],"$import:chart0":"/v2/template/HNPr-tr_AAc"}`),
 		Title: "Service overview",
 		Metadata: template.WriteMetadata{
@@ -76,8 +78,8 @@ func TestCreateTemplateWithDatasource(t *testing.T) {
 	defer teardown()
 
 	rootElement := template.RootElementChart
-	write := &template.Content{
-		Type:  template.RecordType,
+	write := &template.CreateUpdateTemplateRequest{
+		Type:  templateRecordType,
 		Spec:  json.RawMessage(`{"<Chart>":[]}`),
 		Title: "Request rate",
 		Metadata: template.WriteMetadata{
@@ -133,7 +135,7 @@ func TestCreateTemplate(t *testing.T) {
 		"template/dashboard_success.json",
 	))
 
-	result, err := client.CreateTemplate(context.Background(), testContent())
+	result, err := client.CreateTemplate(context.Background(), testTemplateWriteRequest())
 	require.NoError(t, err)
 	require.NotNil(t, result.Data)
 	assert.Equal(t, "HNPz_pNAIAE", result.Data.ID)
@@ -195,7 +197,7 @@ func TestUpdateTemplate(t *testing.T) {
 	teardown := setup()
 	defer teardown()
 
-	write := testContent()
+	write := testTemplateWriteRequest()
 	write.SignalView = json.RawMessage(`{"lastConvertedAt":null}`)
 	mux.HandleFunc(TemplateAPIURL+"/HNPz_pNAIAE", verifyRequestWithJsonBody(
 		t,
@@ -320,7 +322,7 @@ func TestUpdateTemplateResponseErrorDoesNotExposeRequest(t *testing.T) {
 	teardown := setup()
 	defer teardown()
 
-	write := testContent()
+	write := testTemplateWriteRequest()
 	write.Title = "private template title"
 	mux.HandleFunc(
 		TemplateAPIURL+"/HNPz_pNAIAE",
@@ -349,7 +351,7 @@ func TestTemplateRejectsInvalidArguments(t *testing.T) {
 	assert.Nil(t, result)
 	assert.EqualError(t, err, "template ID must not be empty")
 
-	result, err = c.UpdateTemplate(context.Background(), "", testContent())
+	result, err = c.UpdateTemplate(context.Background(), "", testTemplateWriteRequest())
 	assert.Nil(t, result)
 	assert.EqualError(t, err, "template ID must not be empty")
 
@@ -375,7 +377,7 @@ func TestTemplateOptionParamsOmitZeroValues(t *testing.T) {
 
 func TestCreateTemplateRejectsInvalidRawJSON(t *testing.T) {
 	c := &Client{}
-	write := testContent()
+	write := testTemplateWriteRequest()
 	write.Spec = json.RawMessage("{")
 
 	result, err := c.CreateTemplate(context.Background(), write)

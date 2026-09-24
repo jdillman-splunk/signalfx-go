@@ -2,7 +2,7 @@
   "data": {
     "id": "HNPr-tr_AAc",
     "self": "/v2/template/HNPr-tr_AAc",
-    "type": "https://schema.splunkdev.com/dashify/v1/templates/Record",
+    "type": "#/dashify/v1/templates/Record",
     "title": "Request rate",
     "spec": {
       "<Chart>": [

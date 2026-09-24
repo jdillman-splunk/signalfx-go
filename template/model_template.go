@@ -6,9 +6,6 @@ import (
 	"github.com/signalfx/signalfx-go/util"
 )
 
-// RecordType is the schema type used by Template API records.
-const RecordType = "https://schema.splunkdev.com/dashify/v1/templates/Record"
-
 // RootElement identifies the kind of document stored in a Template record.
 type RootElement string
 
@@ -63,11 +60,12 @@ type Metadata struct {
 	Imports     []string     `json:"imports"`
 }
 
-// Content is the body used to create or replace a Template record.
+// CreateUpdateTemplateRequest is the body used to create or replace a Template record.
 //
 // Spec contains the polymorphic Dashify document. SignalView is omitted for a
 // nil value and may contain the association update object accepted by the API.
-type Content struct {
+type CreateUpdateTemplateRequest struct {
+	// Type is the record type identifier expected by the Template API.
 	Type       string          `json:"type"`
 	Spec       json.RawMessage `json:"spec"`
 	Title      string          `json:"title"`
@@ -100,8 +98,9 @@ type Result struct {
 	Includes []Template `json:"includes"`
 }
 
-// Collection describes a page of Template URI references.
-type Collection struct {
+// SearchPage contains the pagination links, total count, and Template URI
+// references returned by a Template search.
+type SearchPage struct {
 	Type  string   `json:"type"`
 	Self  string   `json:"self"`
 	Next  *string  `json:"next"`
@@ -112,7 +111,7 @@ type Collection struct {
 
 // SearchResult is the response envelope for a Template search.
 type SearchResult struct {
-	Data     *Collection `json:"data"`
+	Data     *SearchPage `json:"data"`
 	Errors   []APIError  `json:"errors"`
 	Includes []Template  `json:"includes"`
 }
